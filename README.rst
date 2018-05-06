@@ -10,7 +10,7 @@ to ask for it.
 
 At the moment, this emulator misses any snapshot support, meaning that every time
 you power down the emulator, you loose all game state. The underlying emulator code also seems somewhat wonky,
-as not all ROMs appear to work. I'm not 100% sure about this, as I don't have a SuperVision to check.
+as not all ROMs appear to work.
 
 Potator seems to be written by Cal2 & Normmatt, and the version used here is modified by alekmaul. Potator
 seems to be distributed as 'open-source' without specifying a particular license. The M6502 CPU core also

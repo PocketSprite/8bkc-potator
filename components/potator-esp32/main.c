@@ -169,9 +169,12 @@ int app_main() {
 			for (int i=0; i<(BPS/60)*2; i++) sndbuf[i]=128;
 			sound_stream_update(sndbuf, (BPS/FPS)*2);
 			for (int i=0; i<(BPS/60); i++) {
-				int s=sndbuf[i*2]+sndbuf[i*2+1];
+				int s=sndbuf[i*2]+sndbuf[i*2+1]-256;
+				s=s+128;
+				if (s<0) s=0;
+				if (s>255) s=255;
 //				printf("%x\n", s);
-				sndbuf_hw[i]=s>>1;
+				sndbuf_hw[i]=s;
 			}
 			kchal_sound_push(sndbuf_hw, (BPS/FPS));
 			bufno=bufno?0:1;
