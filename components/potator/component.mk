@@ -1,0 +1,5 @@
+#Component makefile
+
+COMPONENT_ADD_INCLUDEDIRS := M6502 .
+COMPONENT_SRCDIRS := M6502 .
+
