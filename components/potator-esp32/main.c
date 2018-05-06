@@ -114,9 +114,10 @@ static void draw(uint16_t *src, uint16_t *dst) {
 
 QueueHandle_t vidQueue;
 
+uint16_t *oledfb;
 
 void videoTask(void *arg) {
-	uint16_t *oledfb=malloc(80*64*2);
+	oledfb=malloc(80*64*2);
 	uint16_t *screenbuffer;
 	while(1) {
 		xQueueReceive(vidQueue, &screenbuffer, portMAX_DELAY);
@@ -155,7 +156,7 @@ int app_main() {
 	supervision_init(); //Init the emulator	
 	supervision_load((u8*)romdata, (uint32)sz);
 
-	uint16_t sndbuf[(BPS/FPS)*2]={0};
+	uint8_t sndbuf[(BPS/FPS)*2]={0};
 	uint8_t sndbuf_hw[BPS/FPS];
 
 	kchal_sound_start(BPS, 2048);
@@ -165,12 +166,12 @@ int app_main() {
 			controls_update();
 			supervision_exec((int16*)screenbuffer[bufno],1);
 			xQueueSend(vidQueue, &screenbuffer[bufno], 0);
-			for (int i=0; i<(BPS/60)*2; i++) sndbuf[i]=32768;
+			for (int i=0; i<(BPS/60)*2; i++) sndbuf[i]=128;
 			sound_stream_update(sndbuf, (BPS/FPS)*2);
 			for (int i=0; i<(BPS/60); i++) {
 				int s=sndbuf[i*2]+sndbuf[i*2+1];
 //				printf("%x\n", s);
-				sndbuf_hw[i]=s>>9;
+				sndbuf_hw[i]=s>>1;
 			}
 			kchal_sound_push(sndbuf_hw, (BPS/FPS));
 			bufno=bufno?0:1;

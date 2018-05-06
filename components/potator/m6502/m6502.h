@@ -113,9 +113,11 @@ word Run6502(register M6502 *R);
 /** checks can be skipped to make it fast. It is only       **/
 /** required if there is a #define FAST_RDOP.               **/
 /************************************ TO BE WRITTEN BY USER **/
-void Wr6502(register word Addr,register byte Value);
-byte Rd6502(register word Addr);
-byte Op6502(register word Addr);
+//void Wr6502(register word Addr,register byte Value);
+//byte Rd6502(register word Addr);
+//byte Op6502(register word Addr);
+
+#include "memorymap.h"
 
 /** Debug6502() **********************************************/
 /** This function should exist if DEBUG is #defined. When   **/

@@ -1,3 +1,4 @@
+#pragma GCC optimize ("O2")
 /** M65C02: portable 65C02 emulator **************************/
 /**                                                         **/
 /**                         M65C02.c                        **/

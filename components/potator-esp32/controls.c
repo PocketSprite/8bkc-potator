@@ -1,7 +1,12 @@
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/timers.h>
+#include <freertos/task.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "controls.h"
 #include "8bkc-hal.h"
+#include "powerbtn_menu.h"
 
 uint8 controls_state;
 
@@ -40,6 +45,9 @@ uint8 controls_read(uint32 addr)
 	return(controls_state^0xff); 
 }
 
+//defined in main.c
+extern uint16_t *oledfb;
+
 BOOL controls_update(void)
 {
 	controls_state = 0;
@@ -53,6 +61,17 @@ BOOL controls_update(void)
 	if (keys & KC_BTN_B)		controls_state|=0x20;
 	if (keys & KC_BTN_SELECT)	controls_state|=0x40;
 	if (keys & KC_BTN_START)	controls_state|=0x80;
+
+	if (keys & KC_BTN_POWER) {
+		//Show powerbutton menu. Not customized in any sense atm. This should really have select new game,
+		//reset emu, etc functionality.
+		vTaskDelay(10); //hack: make sure video task is done with framebuffer
+		kchal_sound_mute(1);
+		int r=powerbtn_menu_show(oledfb);
+		if (r==POWERBTN_MENU_EXIT) kchal_exit_to_chooser();
+		if (r==POWERBTN_MENU_POWERDOWN) kchal_power_down();
+		kchal_sound_mute(0);
+	}
 
 	return(TRUE);
 }
