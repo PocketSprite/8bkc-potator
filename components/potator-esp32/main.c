@@ -125,6 +125,8 @@ void videoTask(void *arg) {
 	}
 }
 
+#define FPS 60
+
 int app_main() {
 	int i;
 	kchal_init();
@@ -153,12 +155,24 @@ int app_main() {
 	supervision_init(); //Init the emulator	
 	supervision_load((u8*)romdata, (uint32)sz);
 
+	uint16_t sndbuf[(BPS/FPS)*2]={0};
+	uint8_t sndbuf_hw[BPS/FPS];
+
+	kchal_sound_start(BPS, 2048);
 	int bufno=0;
 	while(1) {
 		while(!paused) {
 			controls_update();
 			supervision_exec((int16*)screenbuffer[bufno],1);
 			xQueueSend(vidQueue, &screenbuffer[bufno], 0);
+			for (int i=0; i<(BPS/60)*2; i++) sndbuf[i]=32768;
+			sound_stream_update(sndbuf, (BPS/FPS)*2);
+			for (int i=0; i<(BPS/60); i++) {
+				int s=sndbuf[i*2]+sndbuf[i*2+1];
+//				printf("%x\n", s);
+				sndbuf_hw[i]=s>>9;
+			}
+			kchal_sound_push(sndbuf_hw, (BPS/FPS));
 			bufno=bufno?0:1;
 			controls_reset();
 		}

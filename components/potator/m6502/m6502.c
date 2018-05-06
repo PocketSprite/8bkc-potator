@@ -19,8 +19,8 @@
 
 /* This is M65C02 Version 1.4 of 2002.1220 -uso. */
 
-#include "M6502.h"
-#include "Tables.h"
+#include "m6502.h"
+#include "tables.h"
 #include "../types.h"
 #include <stdio.h>
 

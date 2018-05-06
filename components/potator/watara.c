@@ -1,11 +1,21 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+////////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+//
+//
+//
+//
+////////////////////////////////////////////////////////////////////////////////
 #include "supervision.h"
 #include "memorymap.h"
 #include "sound.h"
 #include "types.h"
 #include <stdlib.h>
 #include <stdio.h>
-
-
+#include <string.h>
 static M6502	m6502_registers;
 
 byte Loop6502(register M6502 *R)
@@ -15,15 +25,10 @@ byte Loop6502(register M6502 *R)
 
 void supervision_init(void)
 {
-	//fprintf(log_get(), "supervision: init\n");
-	#ifndef DEBUG
-	//iprintf("supervision: init\n");
-	#endif
-
 	memorymap_init();
 	io_init();
 	gpu_init();
-	p_timer_init();
+	ptimer_init();
 	controls_init();
 	sound_init();
 	interrupts_init();
@@ -31,22 +36,17 @@ void supervision_init(void)
 
 BOOL supervision_load(uint8 *rom, uint32 romSize)
 {
-
 	memorymap_load(rom, romSize);
 	supervision_reset();
-
 	return(TRUE);
 }
 
 void supervision_reset(void)
 {
-	//fprintf(log_get(), "supervision: reset\n");
-
-
 	memorymap_reset();
 	io_reset();
 	gpu_reset();
-	p_timer_reset();
+	ptimer_reset();
 	controls_reset();
 	sound_reset();
 	interrupts_reset();
@@ -56,16 +56,14 @@ void supervision_reset(void)
 
 void supervision_reset_handler(void)
 {
-	//fprintf(log_get(), "supervision: reset handler\n");
 }
 
 void supervision_done(void)
 {
-	//fprintf(log_get(), "supervision: done\n");
 	memorymap_done();
 	io_done();
 	gpu_done();
-	p_timer_done();
+	ptimer_done();
 	controls_done();
 	sound_done();
 	interrupts_done();
@@ -83,12 +81,13 @@ BOOL supervision_update_input(void)
 
 void supervision_exec(int16 *backbuffer, BOOL bRender)
 {
-	uint32 supervision_scanline;
+	uint32 supervision_scanline, scan1=0;
 
-	for (supervision_scanline = 0; supervision_scanline < 160; supervision_scanline++){
-		m6502_registers.ICount = 512/2; //shouldnt really devide by two its just quicker :)
-		p_timer_exec(m6502_registers.ICount);
-		sound_exec(11025/160);
+	for (supervision_scanline = 0; supervision_scanline < 160; supervision_scanline++)
+	{
+		m6502_registers.ICount = 512; 
+		ptimer_exec(m6502_registers.ICount);
+		//sound_exec(22050/160);
 		Run6502(&m6502_registers);
 		gpu_render_scanline(supervision_scanline, backbuffer);
 		backbuffer += (160/8);
@@ -96,6 +95,7 @@ void supervision_exec(int16 *backbuffer, BOOL bRender)
 
 	if (Rd6502(0x2026)&0x01)
 		Int6502(supervision_get6502regs(), INT_NMI);
+	sound_decrement();
 }
 
 void supervision_turnSound(BOOL bOn)
@@ -129,6 +129,7 @@ int	sv_loadState(char *statepath, int id)
 	return(1);
 }
 
+
 int	sv_saveState(char *statepath, int id)
 {
 #if 0
@@ -137,7 +138,6 @@ int	sv_saveState(char *statepath, int id)
 
 	strcpy(newPath,statepath);
 	sprintf(newPath+strlen(newPath)-3,".s%d",id);
-
 
 	fp=fopen(newPath,"wb");
 
